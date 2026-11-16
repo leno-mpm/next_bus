@@ -7,8 +7,9 @@ import 'package:next_bus/models/incident.dart';
 
 class IncidentCard extends StatelessWidget {
   final Incident incident;
+  final VoidCallback? onResolve;
 
-  const IncidentCard({super.key, required this.incident});
+  const IncidentCard({super.key, required this.incident, this.onResolve});
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +62,16 @@ class IncidentCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (incident.isOpen && onResolve != null) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: onResolve,
+                  child: const Text('Marcar resuelta'),
+                ),
+              ),
+            ],
           ],
         ),
       ),

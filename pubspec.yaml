@@ -38,6 +38,9 @@ dependencies:
   # State management (MVVM ViewModels as ChangeNotifier)
   provider: ^6.1.2
 
+  # Barlow / Barlow Condensed for the "Industry" design system
+  google_fonts: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

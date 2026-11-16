@@ -100,6 +100,7 @@ enum IncidentType {
   problemasParada,
   problemasPasajeros,
   desvioRuta,
+  clima,
   otro;
 
   String get label => switch (this) {
@@ -110,6 +111,7 @@ enum IncidentType {
         IncidentType.problemasParada => 'Problemas en una parada',
         IncidentType.problemasPasajeros => 'Problemas con pasajeros',
         IncidentType.desvioRuta => 'Desvío de ruta',
+        IncidentType.clima => 'Clima',
         IncidentType.otro => 'Otro',
       };
 }

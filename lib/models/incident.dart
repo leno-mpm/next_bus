@@ -12,6 +12,11 @@ class Incident {
   final DateTime reportedAt;
   final IncidentStatus status;
 
+  /// Minutos de retraso estimados al reportar (C3). Se suman por bus/
+  /// conductor para el aviso de retraso en C2, el resumen de C5 y la
+  /// bitácora/avisos (C4/S7).
+  final int delayMinutes;
+
   const Incident({
     required this.id,
     required this.busId,
@@ -23,7 +28,10 @@ class Incident {
     required this.description,
     required this.reportedAt,
     this.status = IncidentStatus.reportada,
+    this.delayMinutes = 0,
   });
+
+  bool get isOpen => status != IncidentStatus.resuelta;
 
   Incident copyWith({IncidentStatus? status}) {
     return Incident(
@@ -37,6 +45,7 @@ class Incident {
       description: description,
       reportedAt: reportedAt,
       status: status ?? this.status,
+      delayMinutes: delayMinutes,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:next_bus/core/enums/enums.dart';
 import 'package:next_bus/data/repositories/driver_repository.dart';
 import 'package:next_bus/data/repositories/incident_repository.dart';
+import 'package:next_bus/data/repositories/shift_repository.dart';
 import 'package:next_bus/data/repositories/stop_repository.dart';
 import 'package:next_bus/models/incident.dart';
 import 'package:next_bus/models/stop.dart';
@@ -13,14 +14,17 @@ class ReportIncidentViewModel extends ChangeNotifier {
   final DriverRepository _driverRepository;
   final IncidentRepository _incidentRepository;
   final StopRepository _stopRepository;
+  final ShiftRepository _shiftRepository;
 
   ReportIncidentViewModel({
     required DriverRepository driverRepository,
     required IncidentRepository incidentRepository,
     required StopRepository stopRepository,
+    required ShiftRepository shiftRepository,
   })  : _driverRepository = driverRepository,
         _incidentRepository = incidentRepository,
-        _stopRepository = stopRepository;
+        _stopRepository = stopRepository,
+        _shiftRepository = shiftRepository;
 
   bool isLoading = true;
   bool isSubmitting = false;
@@ -36,6 +40,7 @@ class ReportIncidentViewModel extends ChangeNotifier {
   IncidentSeverity severity = IncidentSeverity.medio;
   String description = '';
   String? stopId;
+  int delayMinutes = 0;
 
   String? descriptionError;
 
@@ -45,8 +50,9 @@ class ReportIncidentViewModel extends ChangeNotifier {
     try {
       final driver = await _driverRepository.getCurrentDriver();
       stops = await _stopRepository.getAllStops();
+      final shift = await _shiftRepository.getCurrentShift(driver.id);
       driverId = driver.id;
-      busId = driver.assignedBusId;
+      busId = shift?.busId ?? driver.assignedBusId;
       routeId = driver.assignedRouteId;
     } catch (e) {
       errorMessage = 'No se pudo cargar el formulario.';
@@ -77,6 +83,11 @@ class ReportIncidentViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setDelayMinutes(int value) {
+    delayMinutes = value;
+    notifyListeners();
+  }
+
   bool _validate() {
     descriptionError = description.trim().isEmpty
         ? 'Describe brevemente lo ocurrido.'
@@ -99,6 +110,7 @@ class ReportIncidentViewModel extends ChangeNotifier {
       severity: severity,
       description: description.trim(),
       reportedAt: DateTime.now(),
+      delayMinutes: delayMinutes,
     );
     await _incidentRepository.addIncident(incident);
     isSubmitting = false;

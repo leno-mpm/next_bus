@@ -64,8 +64,8 @@ class _MyTripBody extends StatelessWidget {
                               children: [
                                 StatusBadge(
                                   label: 'Sentido ${route.direction.label}',
-                                  color: AppColors.navy,
-                                  background: const Color(0xFFE3EAF2),
+                                  color: AppColors.accent900,
+                                  background: AppColors.accent100,
                                   icon: Icons.swap_vert_rounded,
                                 ),
                                 const SizedBox(width: 8),
@@ -141,8 +141,8 @@ class _MyTripBody extends StatelessWidget {
                                 : isNext
                                     ? const StatusBadge(
                                         label: 'Próxima',
-                                        color: AppColors.navy,
-                                        background: Color(0xFFE3EAF2),
+                                        color: AppColors.accent900,
+                                        background: AppColors.accent100,
                                       )
                                     : null,
                           );

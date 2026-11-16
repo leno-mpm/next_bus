@@ -61,8 +61,8 @@ class BusEtaCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text('${eta.etaMinutes}', style: AppTextStyles.etaValue),
-                const Padding(
-                  padding: EdgeInsets.only(left: 4, bottom: 4),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 4),
                   child: Text('min', style: AppTextStyles.bodySecondary),
                 ),
                 const SizedBox(width: 10),

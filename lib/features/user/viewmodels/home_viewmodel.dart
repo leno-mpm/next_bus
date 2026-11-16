@@ -9,24 +9,13 @@ import 'package:next_bus/data/repositories/stop_repository.dart';
 import 'package:next_bus/data/services/arrivals_resolver.dart';
 import 'package:next_bus/models/bus.dart';
 import 'package:next_bus/models/stop.dart';
+import 'package:next_bus/models/transit_route.dart';
 
-/// Un tramo restante hasta "mi parada": una parada intermedia (o la parada
-/// destino) con su tiempo estimado desde ahora.
-class RemainingStop {
-  final Stop stop;
-  final int etaMinutes;
-  final bool isTarget;
-
-  const RemainingStop({
-    required this.stop,
-    required this.etaMinutes,
-    required this.isTarget,
-  });
-}
-
-/// ViewModel de Inicio (sección 7.1), reenfocado en "mi parada": el usuario
-/// elige una parada y ve, en tarjetas deslizables, los buses que se
-/// aproximan junto con las paradas que faltan y su tiempo estimado.
+/// ViewModel de Inicio (S2): mapa esquemático en vivo + la parada
+/// seleccionada con sus llegadas. El mapa usa la flota "en reposo" de
+/// `BusRepository` (posición estable); las llegadas a la parada
+/// seleccionada siguen viniendo del motor de escenarios de ETA existente
+/// (sección 9), sin tocar esa simulación.
 class HomeViewModel extends ChangeNotifier {
   final BusRepository _busRepository;
   final StopRepository _stopRepository;
@@ -56,20 +45,25 @@ class HomeViewModel extends ChangeNotifier {
   String selectedStopId = 'FIEC';
   Stop? selectedStop;
   List<StopArrival> arrivals = const [];
-  Map<String, List<RemainingStop>> remainingStopsByBusId = const {};
+  List<TransitRoute> routesForStop = const [];
 
   Timer? _simTimer;
 
   int get busesEnMarchaCount =>
       buses.where((bus) => bus.status == BusStatus.enRuta).length;
 
-  /// Alto de tarjeta del carrusel de Inicio: se ajusta al bus con más
-  /// paradas pendientes para no dejar espacio vacío en los casos simples,
-  /// pero con un tope para que la página siga siendo manejable.
-  double get carouselCardHeight {
-    final maxRemaining = remainingStopsByBusId.values
-        .fold(0, (m, l) => l.length > m ? l.length : m);
-    return (220 + maxRemaining * 34).clamp(260, 420).toDouble();
+  /// Ruta de referencia para el mapa: la de la llegada más próxima o, si no
+  /// hay llegadas, la primera ruta de la flota en reposo.
+  TransitRoute? get primaryRoute => _primaryRoute;
+  TransitRoute? _primaryRoute;
+
+  List<Stop> get orderedStopsForMap {
+    final route = _primaryRoute;
+    if (route == null) return const [];
+    return route.stopIds
+        .where(_stopsById.containsKey)
+        .map((id) => _stopsById[id]!)
+        .toList();
   }
 
   Future<void> load() async {
@@ -108,59 +102,15 @@ class HomeViewModel extends ChangeNotifier {
     );
     selectedStop = result.stop;
     arrivals = result.arrivals;
-    _rebuildRemainingStops();
-  }
-
-  /// Reparte el ETA de cada bus entre las paradas que le faltan hasta "mi
-  /// parada", de forma proporcional: es una simulación para mostrar el
-  /// avance del recorrido, no una predicción por tramo real.
-  void _rebuildRemainingStops() {
-    final result = <String, List<RemainingStop>>{};
-    for (final arrival in arrivals) {
-      final route = arrival.route;
-      if (route == null) continue;
-      final stopIds = route.stopIds;
-      final targetIndex = stopIds.indexOf(selectedStopId);
-      if (targetIndex == -1) continue;
-
-      var startIndex = targetIndex;
-      final nextStopId = arrival.bus.nextStopId;
-      final currentStopId = arrival.bus.currentStopId;
-      if (nextStopId != null && stopIds.contains(nextStopId)) {
-        startIndex = stopIds.indexOf(nextStopId);
-      } else if (currentStopId != null && stopIds.contains(currentStopId)) {
-        startIndex = (stopIds.indexOf(currentStopId) + 1)
-            .clamp(0, stopIds.length - 1);
-      }
-      if (startIndex > targetIndex) startIndex = targetIndex;
-
-      final remainingIds = stopIds.sublist(startIndex, targetIndex + 1);
-      final count = remainingIds.length;
-      final totalEta = arrival.eta.etaMinutes;
-
-      final stops = <RemainingStop>[];
-      for (var i = 0; i < count; i++) {
-        final stop = _stopsById[remainingIds[i]];
-        if (stop == null) continue;
-        final isTarget = i == count - 1;
-        final etaForStop =
-            isTarget ? totalEta : ((totalEta * (i + 1)) / count).round();
-        stops.add(RemainingStop(
-          stop: stop,
-          etaMinutes: etaForStop,
-          isTarget: isTarget,
-        ));
-      }
-      result[arrival.bus.id] = stops;
-    }
-    remainingStopsByBusId = result;
+    routesForStop = result.routesForStop;
+    _primaryRoute =
+        arrivals.firstOrNull?.route ?? routesForStop.firstOrNull ?? _primaryRoute;
   }
 
   void _startSimulatedUpdates() {
     _simTimer?.cancel();
     _simTimer = Timer.periodic(const Duration(seconds: 12), (_) {
       arrivals = simulateArrivalsTick(arrivals);
-      _rebuildRemainingStops();
       notifyListeners();
     });
   }

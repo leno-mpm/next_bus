@@ -12,6 +12,17 @@ class Bus {
   final String? currentStopId;
   final String? nextStopId;
 
+  /// Capacidad de pasajeros sentados/de pie.
+  final int capacity;
+
+  /// Pasajeros a bordo en este momento (C2 los ajusta manualmente).
+  final int passengerCount;
+
+  /// Dólares de combustible consumidos este mes (C7 los incrementa). Se
+  /// compara contra `FuelRepository.monthlyBudgetUsd` para decidir si la
+  /// unidad puede asignarse (C1).
+  final double fuelUsed;
+
   const Bus({
     required this.id,
     required this.name,
@@ -23,6 +34,9 @@ class Bus {
     this.currentSegmentToStopId,
     this.currentStopId,
     this.nextStopId,
+    this.capacity = 50,
+    this.passengerCount = 0,
+    this.fuelUsed = 0,
   });
 
   Bus copyWith({
@@ -33,6 +47,9 @@ class Bus {
     String? currentSegmentToStopId,
     String? currentStopId,
     String? nextStopId,
+    int? capacity,
+    int? passengerCount,
+    double? fuelUsed,
   }) {
     return Bus(
       id: id,
@@ -47,6 +64,9 @@ class Bus {
           currentSegmentToStopId ?? this.currentSegmentToStopId,
       currentStopId: currentStopId ?? this.currentStopId,
       nextStopId: nextStopId ?? this.nextStopId,
+      capacity: capacity ?? this.capacity,
+      passengerCount: passengerCount ?? this.passengerCount,
+      fuelUsed: fuelUsed ?? this.fuelUsed,
     );
   }
 }

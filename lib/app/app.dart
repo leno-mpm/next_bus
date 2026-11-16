@@ -5,9 +5,11 @@ import 'package:next_bus/app/theme/app_theme.dart';
 import 'package:next_bus/data/repositories/bus_repository.dart';
 import 'package:next_bus/data/repositories/driver_repository.dart';
 import 'package:next_bus/data/repositories/eta_repository.dart';
+import 'package:next_bus/data/repositories/fuel_repository.dart';
 import 'package:next_bus/data/repositories/incident_repository.dart';
+import 'package:next_bus/data/repositories/preferences_repository.dart';
 import 'package:next_bus/data/repositories/route_repository.dart';
-import 'package:next_bus/data/repositories/schedule_repository.dart';
+import 'package:next_bus/data/repositories/shift_repository.dart';
 import 'package:next_bus/data/repositories/stop_repository.dart';
 import 'package:next_bus/data/repositories/trip_repository.dart';
 import 'package:next_bus/features/driver/shell/driver_shell.dart';
@@ -27,14 +29,20 @@ class NextBusApp extends StatelessWidget {
         Provider<StopRepository>(create: (_) => MockStopRepository()),
         Provider<RouteRepository>(create: (_) => MockRouteRepository()),
         Provider<BusRepository>(create: (_) => MockBusRepository()),
-        Provider<ScheduleRepository>(create: (_) => MockScheduleRepository()),
         Provider<EtaRepository>(create: (_) => MockEtaRepository()),
         Provider<IncidentRepository>(create: (_) => MockIncidentRepository()),
         Provider<DriverRepository>(create: (_) => MockDriverRepository()),
         Provider<TripRepository>(create: (_) => MockTripRepository()),
+        Provider<FuelRepository>(
+          create: (ctx) => MockFuelRepository(ctx.read<BusRepository>()),
+        ),
+        Provider<ShiftRepository>(create: (_) => MockShiftRepository()),
+        Provider<PreferencesRepository>(
+          create: (_) => MockPreferencesRepository(),
+        ),
       ],
       child: MaterialApp(
-        title: 'NextBus',
+        title: 'Ruta ESPOL',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         initialRoute: AppRoutes.profileSelection,

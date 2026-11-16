@@ -16,6 +16,8 @@ final List<Bus> mockBuses = [
     currentSegmentFromStopId: 'GARE',
     currentSegmentToStopId: 'FCV',
     nextStopId: 'FCV',
+    passengerCount: 18,
+    fuelUsed: 42,
   ),
   const Bus(
     id: 'BUS02',
@@ -27,6 +29,8 @@ final List<Bus> mockBuses = [
     currentSegmentFromStopId: 'FCSH',
     currentSegmentToStopId: 'BIB',
     nextStopId: 'BIB',
+    passengerCount: 31,
+    fuelUsed: 76,
   ),
   const Bus(
     id: 'BUS03',
@@ -37,5 +41,7 @@ final List<Bus> mockBuses = [
     direction: Direction.salida,
     currentStopId: 'EBUS',
     nextStopId: 'BIB',
+    passengerCount: 0,
+    fuelUsed: 100,
   ),
 ];

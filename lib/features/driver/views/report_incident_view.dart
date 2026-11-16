@@ -5,7 +5,9 @@ import 'package:next_bus/app/theme/app_text_styles.dart';
 import 'package:next_bus/core/enums/enums.dart';
 import 'package:next_bus/data/repositories/driver_repository.dart';
 import 'package:next_bus/data/repositories/incident_repository.dart';
+import 'package:next_bus/data/repositories/shift_repository.dart';
 import 'package:next_bus/data/repositories/stop_repository.dart';
+import 'package:next_bus/core/widgets/segmented_control.dart';
 import 'package:next_bus/features/driver/viewmodels/report_incident_viewmodel.dart';
 
 class ReportIncidentView extends StatelessWidget {
@@ -18,6 +20,7 @@ class ReportIncidentView extends StatelessWidget {
         driverRepository: ctx.read<DriverRepository>(),
         incidentRepository: ctx.read<IncidentRepository>(),
         stopRepository: ctx.read<StopRepository>(),
+        shiftRepository: ctx.read<ShiftRepository>(),
       )..load(),
       child: const _ReportIncidentBody(),
     );
@@ -64,7 +67,7 @@ class _ReportIncidentBodyState extends State<_ReportIncidentBody> {
                 const SizedBox(height: 16),
                 Text('Incidencia registrada', style: AppTextStyles.title),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Tu reporte fue guardado y ya aparece en el historial.',
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodySecondary,
@@ -136,6 +139,20 @@ class _ReportIncidentBodyState extends State<_ReportIncidentBody> {
                 .toList(),
           ),
           const SizedBox(height: 20),
+          Text('Retraso estimado', style: AppTextStyles.sectionTitle),
+          const SizedBox(height: 8),
+          SegmentedControl<int>(
+            options: const [
+              SegmentOption(value: 0, label: 'No'),
+              SegmentOption(value: 3, label: '+3'),
+              SegmentOption(value: 5, label: '+5'),
+              SegmentOption(value: 10, label: '+10'),
+              SegmentOption(value: 15, label: '+15'),
+            ],
+            value: vm.delayMinutes,
+            onChanged: vm.setDelayMinutes,
+          ),
+          const SizedBox(height: 20),
           Text('Descripción', style: AppTextStyles.sectionTitle),
           const SizedBox(height: 8),
           TextField(
@@ -153,6 +170,7 @@ class _ReportIncidentBodyState extends State<_ReportIncidentBody> {
           const SizedBox(height: 8),
           DropdownButtonFormField<String?>(
             initialValue: vm.stopId,
+            isExpanded: true,
             decoration: const InputDecoration(hintText: 'Selecciona una parada'),
             items: [
               const DropdownMenuItem<String?>(
@@ -161,7 +179,10 @@ class _ReportIncidentBodyState extends State<_ReportIncidentBody> {
               ),
               ...vm.stops.map((stop) => DropdownMenuItem<String?>(
                     value: stop.id,
-                    child: Text('${stop.id} · ${stop.name}'),
+                    child: Text(
+                      '${stop.id} · ${stop.name}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   )),
             ],
             onChanged: vm.setStopId,
